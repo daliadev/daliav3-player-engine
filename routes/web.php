@@ -9,4 +9,7 @@ Route::group(['prefix' => 'api'], function(){
 			Route::get('activite', 'ActiviteController@index');
       Route::get('activite/{id}', 'ActiviteController@show');
 
+      // Route adapter : .../api/context/{ctx}
+      Route::resource('context', 'ContextController'); 
+
 });
