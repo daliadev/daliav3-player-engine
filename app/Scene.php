@@ -17,10 +17,10 @@ class Scene extends Model
   {
     $scenes = DB::table('scenes')
     ->select('scenes.id')
-    ->join('sequences', 'scenes.sequence_id', '=', 'sequences.id')
-    ->join('activites', 'sequences.activite_id', '=', 'activites.id')
-    ->where('activites.id', '=', $id)
-    ->orderBy('position', 'ASC')
+    ->join('sequences_scenes', 'sequences_scenes.id_scene', '=', 'scenes.id')
+    ->join('activites_sequences', 'activites_sequences.id_sequence', '=', 'sequences_scenes.id_sequence')
+    ->where('activites_sequences.id_activite', '=', $id)
+    ->orderBy('sequences_scenes.position', 'ASC')
     ->get();
 
     return $scenes;
@@ -40,6 +40,7 @@ class Scene extends Model
 
   public function activeScene($user_id, $activite_id)
   {
+    // A FAIRE : A REVOIR
     $active_scene = DB::table('sessions')
     ->select('curent_scene')
     ->where('user_id', '=', $user_id)
@@ -50,11 +51,11 @@ class Scene extends Model
 
     $scene = DB::table('scenes')
     ->select('scenes.*')
-    ->join('sequences', 'scenes.sequence_id', '=', 'sequences.id')
-    ->join('activites', 'sequences.activite_id', '=', 'activites.id')
-    ->where('activites.id', '=', $activite_id)
-    ->where('scenes.position', '=', $scenes_list)
-    ->orderBy('position', 'ASC')
+    ->join('sequences_scenes', 'sequences_scenes.id_scene', '=', 'scenes.id')
+    ->join('activites_sequences', 'activites_sequences.id_sequence', '=', 'sequences_scenes.id_sequence')
+    ->where('activites_sequences.id_activite', '=', $activite_id)
+    ->where('sequences_scenes.position', '=', $scenes_list)
+    ->orderBy('sequences_scenes.position', 'ASC')
     ->get();
 
     return $scene;

@@ -100,23 +100,27 @@ class ActiviteController extends Controller
       $active_scene = $this->sceneModel->activeScene($user_id, $activite_id);
       // Checker le "type" de sequence. Si "exercice" => charger le js
       $scene_count = $this->sceneModel->sceneCount($user_id, $activite_id);
-      $last_scene = ($active_scene[0]->position == $scene_count) ? 'yes' : 'no';
-      $first_scene = ($active_scene[0]->position == 1) ? 'yes' : 'no';
+      $position = 1;
+      // var_dump($active_scene);
+      // die();
+      $last_scene = ($position == $scene_count) ? 1 : 0;
+      $first_scene = ($position == 1) ? 1 : 0;
       return view('scene', compact(
         'scenes_list',
         'activite_id',
         'active_scene',
         'last_scene',
-        'first_scene'
+        'first_scene',
+        'position'
       ));
     }
   }
 
   public function create()
   {
-    return Response::json([
-        'info' => 'Ne fonctionne pas pour le moment.',
-    ], 200);
+  return view('createActivite', compact(
+    ''
+  ));
   }
 
   public function goNextScene($activite_id)
@@ -168,9 +172,18 @@ class ActiviteController extends Controller
     }
   }
 
-  public function viewResults(){
+  public function viewResults($activite_id){
       // A FAIRE : on ne peut acceder a result QUE si on a suivi l'activité jusqu'à la fin
-    echo 'coucou';
+    $user_id = Auth::id();
+    $active_scene = $this->sceneModel->activeScene($user_id, $activite_id);
+    $scene_count = $this->sceneModel->sceneCount($user_id, $activite_id);
+    if ($active_scene[0]->position == $scene_count) {
+      return view('results', compact(
+        'activite_id'
+        )) ;
+    } else {
+      return redirect()->route('activite.show', ['activite_id' => $activite_id]);
+    }
   }
 
 
