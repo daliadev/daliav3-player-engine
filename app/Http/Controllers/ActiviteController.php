@@ -58,16 +58,10 @@ class ActiviteController extends Controller
   {
     // Prepare la pagination et les liens pour la vue
     $links = $this->activiteRepository->getPaginate($this->nbrPerPage)->setPath('')->render();
-
     // Recupere la liste des activites
     $activites = $this->activiteRepository->getPaginate($this->nbrPerPage);
 
     return view('activite', compact('activites', 'links'));
-
-    // $activites = Activite::all();
-    // return Response::json([
-		// 	'activites' => $activites
-		// ], 200);
   }
 
   /**
@@ -78,49 +72,53 @@ class ActiviteController extends Controller
   */
   public function show($activite_id)
   {
-    // A FAIRE : remplacer ci-dessous par middleware (?)
-    $user_id = Auth::id();
 
-    $activite_is_started = $this->sceneModel->activiteIsStarted($user_id, $activite_id);
+    if ($this->activiteModel->findOrFail($activite_id)) {
 
-    // Recuperation des scenes composant l'activité n°$id :
-    $scenes_list = $this->sceneModel->getScenes($activite_id);
+        $user_id = Auth::id();
+        $last_session = $this->sessionModel->getLastSession($user_id, $activite_id);
+        // echo $last_session[0]->id;
+        // die();
 
-    // On verifie si le user a deja commencé cette activité
-    if(empty($activite_is_started)) {
-      //Si cette activité existe
-      if ($this->activiteModel->findOrFail($activite_id)) {
-        $this->sessionModel->startNewActivite($user_id, $activite_id);
-        // Puis recharger la page
-        return redirect()->route('activite.show', ['activite_id' => $activite_id]);
-        // Sinon => 404
+        if (empty($last_session[0])) {
+          $this->sessionModel->startNewSession($user_id, $activite_id);
+          // Puis recharger la page
+          return redirect()->route('activite.show', ['activite_id' => $activite_id]);
+        } else {
+          if ($last_session[0]->finish == true) {
+            // echo 'voir results avec bouton recommencer cette activité (= startNewSession())';
+            // die();
+            return redirect()->route('results.show', ['activite_id' => $activite_id]);
+          } else {
+            // Recuperation des scenes composant l'activité n°$id :
+            $scenes_list = $this->sceneModel->getScenes($activite_id);
+            // Afficher la scene active
+            $active_scene = $this->sceneModel->activeScene($user_id, $activite_id);
+            
+            // Checker le "type" de sequence. Si "exercice" => charger le js
+            $scene_count = $this->sceneModel->sceneCount($user_id, $activite_id);
+            $step = $this->sessionModel->getStep($user_id, $activite_id);
+
+            $last_scene = ($step[0]->curent_scene == $scene_count) ? 1 : 0;
+            $first_scene = ($step[0]->curent_scene == 1) ? 1 : 0;
+            return view('scene', compact(
+              'scenes_list',
+              'activite_id',
+              'active_scene',
+              'last_scene',
+              'first_scene',
+              'step'
+            ));
+          }
+        }
       }
-    } else {
-      // Afficher la scene active
-      $active_scene = $this->sceneModel->activeScene($user_id, $activite_id);
-      // Checker le "type" de sequence. Si "exercice" => charger le js
-      $scene_count = $this->sceneModel->sceneCount($user_id, $activite_id);
-      $position = 1;
-      // var_dump($active_scene);
-      // die();
-      $last_scene = ($position == $scene_count) ? 1 : 0;
-      $first_scene = ($position == 1) ? 1 : 0;
-      return view('scene', compact(
-        'scenes_list',
-        'activite_id',
-        'active_scene',
-        'last_scene',
-        'first_scene',
-        'position'
-      ));
     }
-  }
 
   public function create()
   {
-  return view('createActivite', compact(
-    ''
-  ));
+    return view('createActivite', compact(
+      ''
+    ));
   }
 
   public function goNextScene($activite_id)
@@ -129,13 +127,13 @@ class ActiviteController extends Controller
     if ($this->activiteModel->findOrFail($activite_id)) {
       $user_id = Auth::id();
 
-      $active_scene = $this->sceneModel->activeScene($user_id, $activite_id);
+      $step = $this->sessionModel->getStep($user_id, $activite_id);
       $scene_count = $this->sceneModel->sceneCount($user_id, $activite_id);
 
-      $next_scene = ($active_scene[0]->position)+1;
+      $next_scene = ($step[0]->curent_scene)+1;
 
       // Si on est deja a la derniere scene :
-      if ($active_scene[0]->position == $scene_count) {
+      if ($step[0]->curent_scene == $scene_count) {
         return redirect()->route('activite.show', ['activite_id' => $activite_id]);
       }
 
@@ -154,12 +152,12 @@ class ActiviteController extends Controller
     if ($this->activiteModel->findOrFail($activite_id)) {
       $user_id = Auth::id();
 
-      $active_scene = $this->sceneModel->activeScene($user_id, $activite_id);
+      $step = $this->sessionModel->getStep($user_id, $activite_id);
 
-      $previous_scene = ($active_scene[0]->position)-1;
+      $previous_scene = ($step[0]->curent_scene)-1;
 
       // Si on est deja a la premiere scene
-      if ($active_scene[0]->position == 1) {
+      if ($step[0]->curent_scene == 1) {
         return redirect()->route('activite.show', ['activite_id' => $activite_id]);
       }
 
@@ -175,9 +173,17 @@ class ActiviteController extends Controller
   public function viewResults($activite_id){
       // A FAIRE : on ne peut acceder a result QUE si on a suivi l'activité jusqu'à la fin
     $user_id = Auth::id();
-    $active_scene = $this->sceneModel->activeScene($user_id, $activite_id);
     $scene_count = $this->sceneModel->sceneCount($user_id, $activite_id);
-    if ($active_scene[0]->position == $scene_count) {
+    $step = $this->sessionModel->getStep($user_id, $activite_id);
+
+    if ($step[0]->curent_scene == $scene_count) {
+
+      // A FAIRE : mettre a jour le status de cette session à "2"
+      $session_id = $this->sceneModel->activiteIsStarted($user_id, $activite_id);
+      $session = Session::find($session_id[0]['id']);
+      $session->status = 2;
+      $session->save();
+
       return view('results', compact(
         'activite_id'
         )) ;

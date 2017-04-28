@@ -17,7 +17,7 @@ class Session extends Model
     $this->sceneModel = new Scene;
   }
 
-  public function startNewActivite($user_id, $activite_id)
+  public function startNewSession($user_id, $activite_id)
   {
     $scene_count = count($this->sceneModel->getScenes($activite_id));
 
@@ -25,7 +25,61 @@ class Session extends Model
         'user_id' => $user_id,
         'activite_id' => $activite_id,
         'scene_count' => $scene_count,
-        'curent_scene' => 1
+        'curent_scene' => 1,
+        'finish' => false
      ]);
+  }
+
+  public function getSessions($user_id, $activite_id)
+  {
+    $sessions = DB::table('sessions')
+    ->select('*')
+    ->where('activite_id', '=', $activite_id)
+    ->where('user_id', '=', $user_id)
+    ->get();
+
+    return $sessions;
+  }
+
+  public function getLastSession($user_id, $activite_id)
+  {
+    $session = DB::table('sessions')
+    ->select('*')
+    ->where('activite_id', '=', $activite_id)
+    ->where('user_id', '=', $user_id)
+    ->orderBy('updated_at', 'DESC')
+    ->limit(1)
+    ->get();
+
+    return $session;
+  }
+
+  public function getStep($user_id, $activite_id)
+  {
+    $step = DB::table('sessions')
+    ->select('curent_scene')
+    ->where('activite_id', '=', $activite_id)
+    ->where('user_id', '=', $user_id)
+    ->limit(1)
+    ->get();
+
+    return $step;
+  }
+
+  public function getStatus($user_id, $activite_id)
+  {
+    $status = DB::table('sessions')
+    ->select('status')
+    ->where('activite_id', '=', $activite_id)
+    ->where('user_id', '=', $user_id)
+    ->orderBy('updated_at', 'DESC')
+    ->limit(1)
+    ->get();
+
+    if (!empty($status[0]->status)) {
+      return $status[0]->status;
+    } else {
+      return 0;
+    }
   }
 }

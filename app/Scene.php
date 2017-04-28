@@ -45,6 +45,8 @@ class Scene extends Model
     ->select('curent_scene')
     ->where('user_id', '=', $user_id)
     ->where('activite_id', '=', $activite_id)
+    ->orderBy('updated_at', 'DESC')
+    ->limit(1)
     ->get();
 
     $scenes_list = json_decode($active_scene, true);;

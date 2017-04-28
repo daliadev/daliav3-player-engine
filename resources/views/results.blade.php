@@ -14,7 +14,8 @@
       </div>
 		</div>
 
-    {!! link_to_route('activite.index', 'Retour au menu', [], ['class' => 'btn btn-info pull-right']) !!}
+    {!! link_to_route('activite.new', 'Recommencer cette activité', [$activite_id], ['class' => 'btn btn-info pull-left']) !!}
+    {!! link_to_route('results.index', 'Voir tous mes resultats', [], ['class' => 'btn btn-info pull-right']) !!}
 
   </div>
 
