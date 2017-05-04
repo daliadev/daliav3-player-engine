@@ -18,7 +18,7 @@
     <!-- Si isFinished => bouton checkResult -->
     @if($last_scene)
     <!-- A FAIRE : remplacer le "activite.next" ci dessous par une route "view result" -->
-      {!! link_to_route('results.show', 'Voir les resultats', [$activite_id], ['class' => 'btn btn-info pull-right']) !!}
+      {!! link_to_route('result.show', 'Voir les resultats', [$activite_id], ['class' => 'btn btn-info pull-right']) !!}
     @endif
     @if($last_scene == 0)
       {!! link_to_route('activite.next', 'Suite', [$activite_id], ['class' => 'btn btn-info pull-right']) !!}

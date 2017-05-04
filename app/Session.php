@@ -60,6 +60,7 @@ class Session extends Model
     ->select('curent_scene')
     ->where('activite_id', '=', $activite_id)
     ->where('user_id', '=', $user_id)
+    ->orderBy('updated_at', 'DESC')
     ->limit(1)
     ->get();
 

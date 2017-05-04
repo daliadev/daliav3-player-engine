@@ -36,7 +36,7 @@ class SessionController extends Controller
 
     $this->sessionModel->startNewSession($user_id, $activite_id);
     // Puis recharger la page
-    return redirect()->route('activite.show', ['activite_id' => $activite_id]);
+    return redirect()->route('activite.showScene', ['activite_id' => $activite_id]);
   }
 
 }

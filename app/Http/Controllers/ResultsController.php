@@ -64,7 +64,10 @@ class ResultsController extends Controller
     // Recupere la liste des activites
     $activites = $this->activiteRepository->getPaginate($this->nbrPerPage);
 
-    return view('activite', compact('activites', 'links'));
+    return view('activite', compact(
+      'activites',
+      'links'
+    ));
   }
 
   /**
@@ -80,11 +83,13 @@ class ResultsController extends Controller
     $scene_count = $this->sceneModel->sceneCount($user_id, $activite_id);
     $step = $this->sessionModel->getStep($user_id, $activite_id);
 
-    if ($step[0]->curent_scene == $scene_count) {
+    if ($step[0]->curent_scene == $scene_count || $step[0]->curent_scene == $scene_count+1) {
 
       // A FAIRE : mettre a jour le status de cette session à "2"
-      $session_id = $this->sceneModel->activiteIsStarted($user_id, $activite_id);
-      $session = Session::find($session_id[0]['id']);
+      $session_id = ($this->sessionModel->getLastSession($user_id, $activite_id))[0]->id;
+
+      $session = Session::find($session_id);
+      $session->curent_scene = $session->scene_count+1;
       $session->finish = 1;
       $session->save();
 
@@ -92,6 +97,7 @@ class ResultsController extends Controller
         'activite_id'
         )) ;
     } else {
+
       return redirect()->route('activite.show', ['activite_id' => $activite_id]);
     }
   }

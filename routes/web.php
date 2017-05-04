@@ -8,12 +8,13 @@ Route::group(['prefix' => 'api'], function(){
 
 			Route::resource('activite', 'ActiviteController');
 
+			Route::get('activite/{id}/show', 'ActiviteController@showScene')->name('activite.showScene');
 			Route::get('activite/{id}/next', 'ActiviteController@goNextScene')->name('activite.next');
 			Route::get('activite/{id}/previous', 'ActiviteController@goPreviousScene')->name('activite.previous');			// Finish.Activite
-			Route::get('activite/{id}/result', 'ActiviteController@viewResults')->name('activite.result');
+			// Route::get('activite/{id}/result', 'ActiviteController@viewResults')->name('activite.result');
 			Route::get('activite/{id}/new', 'SessionController@newSession')->name('activite.new');
 
-			Route::resource('results', 'ResultsController');
+			Route::resource('result', 'ResultsController');
 
 			// Route adapter : .../api/context/{ctx}
       Route::resource('context', 'ContextController');

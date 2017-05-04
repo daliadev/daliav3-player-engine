@@ -83,35 +83,47 @@ class ActiviteController extends Controller
         if (empty($last_session[0])) {
           $this->sessionModel->startNewSession($user_id, $activite_id);
           // Puis recharger la page
-          return redirect()->route('activite.show', ['activite_id' => $activite_id]);
+          return redirect()->route('activite.showScene', ['activite_id' => $activite_id]);
         } else {
           if ($last_session[0]->finish == true) {
             // echo 'voir results avec bouton recommencer cette activité (= startNewSession())';
             // die();
-            return redirect()->route('results.show', ['activite_id' => $activite_id]);
+            return redirect()->route('result.show', ['activite_id' => $activite_id]);
           } else {
-            // Recuperation des scenes composant l'activité n°$id :
-            $scenes_list = $this->sceneModel->getScenes($activite_id);
-            // Afficher la scene active
-            $active_scene = $this->sceneModel->activeScene($user_id, $activite_id);
-            
-            // Checker le "type" de sequence. Si "exercice" => charger le js
-            $scene_count = $this->sceneModel->sceneCount($user_id, $activite_id);
-            $step = $this->sessionModel->getStep($user_id, $activite_id);
-
-            $last_scene = ($step[0]->curent_scene == $scene_count) ? 1 : 0;
-            $first_scene = ($step[0]->curent_scene == 1) ? 1 : 0;
-            return view('scene', compact(
-              'scenes_list',
-              'activite_id',
-              'active_scene',
-              'last_scene',
-              'first_scene',
-              'step'
+            // choix : recommencer (startnew puis methode qui show) ou continuer
+            // (methode qui show)
+            return view('newOrContinu', compact(
+              'activite_id'
             ));
+            // return $this->showScene($activite_id);
           }
         }
       }
+    }
+
+    public function showScene($activite_id)
+    {
+      $user_id = Auth::id();
+      // Recuperation des scenes composant l'activité n°$id :
+      $scenes_list = $this->sceneModel->getScenes($activite_id);
+      // Afficher la scene active
+      $active_scene = $this->sceneModel->activeScene($user_id, $activite_id);
+
+      // Checker le "type" de sequence. Si "exercice" => charger le js
+      $scene_count = $this->sceneModel->sceneCount($user_id, $activite_id);
+      $step = $this->sessionModel->getStep($user_id, $activite_id);
+
+      $last_scene = ($step[0]->curent_scene == $scene_count) ? 1 : 0;
+      $first_scene = ($step[0]->curent_scene == 1) ? 1 : 0;
+
+      return view('scene', compact(
+        'scenes_list',
+        'activite_id',
+        'active_scene',
+        'last_scene',
+        'first_scene',
+        'step'
+      ));
     }
 
   public function create()
@@ -133,16 +145,16 @@ class ActiviteController extends Controller
       $next_scene = ($step[0]->curent_scene)+1;
 
       // Si on est deja a la derniere scene :
-      if ($step[0]->curent_scene == $scene_count) {
+      if ($step[0]->curent_scene == $scene_count+1) {
         return redirect()->route('activite.show', ['activite_id' => $activite_id]);
       }
 
-      $session_id = $this->sceneModel->activiteIsStarted($user_id, $activite_id);
-      $session = Session::find($session_id[0]['id']);
+      $session_id = $this->sessionModel->getLastSession($user_id, $activite_id);
+      $session = Session::find($session_id[0]->id);
       $session->curent_scene = $next_scene;
       $session->save();
 
-      return redirect()->route('activite.show', ['activite_id' => $activite_id]);
+      return redirect()->route('activite.showScene', ['activite_id' => $activite_id]);
     }
   }
 
@@ -158,15 +170,15 @@ class ActiviteController extends Controller
 
       // Si on est deja a la premiere scene
       if ($step[0]->curent_scene == 1) {
-        return redirect()->route('activite.show', ['activite_id' => $activite_id]);
+        return redirect()->route('activite.showScene', ['activite_id' => $activite_id]);
       }
 
-      $session_id = $this->sceneModel->activiteIsStarted($user_id, $activite_id);
-      $session = Session::find($session_id[0]['id']);
+      $session_id = $this->sessionModel->getLastSession($user_id, $activite_id);
+      $session = Session::find($session_id[0]->id);
       $session->curent_scene = $previous_scene;
       $session->save();
 
-      return redirect()->route('activite.show', ['activite_id' => $activite_id]);
+      return redirect()->route('activite.showScene', ['activite_id' => $activite_id]);
     }
   }
 
