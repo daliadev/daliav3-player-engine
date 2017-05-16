@@ -20,12 +20,13 @@ class Session extends Model
   public function startNewSession($user_id, $activite_id)
   {
     $scene_count = count($this->sceneModel->getScenes($activite_id));
+    $first_scene = ($this->sceneModel->getScenes($activite_id))[0]->id;
 
      DB::table('sessions')->insert([
         'user_id' => $user_id,
         'activite_id' => $activite_id,
         'scene_count' => $scene_count,
-        'curent_scene' => 1,
+        'curent_scene' => $first_scene,
         'finish' => false
      ]);
   }

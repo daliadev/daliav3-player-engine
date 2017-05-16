@@ -32,6 +32,9 @@ class ActiviteController extends Controller
 
   private $request;
 
+
+  // A FAIRE : mettre dans le constructeur toute les variables utilisé partout
+  // (si possible)
   public function __construct(ActiviteRepository $activiteRepository)
   {
     // Modele(s)
@@ -45,8 +48,8 @@ class ActiviteController extends Controller
     $this->activiteRepository = $activiteRepository;
 
     // Middleware(s)
-    $this->middleware('auth')->only(['store', 'create', 'show', 'update', 'destroy', 'edit', 'goNextScene',
-      'goPreviousScene']);
+    $this->middleware('auth')->only(['store', 'create', 'show', 'update', 'destroy',
+    'edit', 'goNextScene', 'goPreviousScene']);
   }
 
   /**
@@ -107,11 +110,17 @@ class ActiviteController extends Controller
       // Recuperation des scenes composant l'activité n°$id :
       $scenes_list = $this->sceneModel->getScenes($activite_id);
       // Afficher la scene active
-      $active_scene = $this->sceneModel->activeScene($user_id, $activite_id);
+      $active_scene = $this->sceneModel->getActiveScene($user_id, $activite_id);
 
       // Checker le "type" de sequence. Si "exercice" => charger le js
       $scene_count = $this->sceneModel->sceneCount($user_id, $activite_id);
       $step = $this->sessionModel->getStep($user_id, $activite_id);
+      $position = $this->sceneModel->getPosition($activite_id, 12);
+
+      echo $position;
+      die();
+
+      // echo $position;
 
       $last_scene = ($step[0]->curent_scene == $scene_count) ? 1 : 0;
       $first_scene = ($step[0]->curent_scene == 1) ? 1 : 0;
@@ -137,24 +146,54 @@ class ActiviteController extends Controller
   {
     // On verifie que l'activité existe
     if ($this->activiteModel->findOrFail($activite_id)) {
+      // A FAIRE : onverifie qu'il y a bien une session en cours pour cette
+      // activité et ce use
       $user_id = Auth::id();
+      $curent_scene_id = ($this->sceneModel->getActiveScene($user_id, $activite_id))[0]->id;
+
+      $curent_scene_position = $this->sceneModel->getPosition($activite_id, $curent_scene_id);
+
+      echo $curent_scene_position;
+      die();
 
       $step = $this->sessionModel->getStep($user_id, $activite_id);
       $scene_count = $this->sceneModel->sceneCount($user_id, $activite_id);
 
       $next_scene = ($step[0]->curent_scene)+1;
 
-      // Si on est deja a la derniere scene :
-      if ($step[0]->curent_scene == $scene_count+1) {
-        return redirect()->route('activite.show', ['activite_id' => $activite_id]);
+      if ($step[0]->curent_scene < $scene_count) {
+
+        // A FAIRE : ci-dessous, ça se fait dans un model ça !!!!
+        $session_id = $this->sessionModel->getLastSession($user_id, $activite_id);
+        $session = Session::find($session_id[0]->id);
+        $session->curent_scene = $next_scene;
+        $session->save();
+
+        // var_dump($session);
+        // die();
+
+
+        return redirect()->route('activite.showScene', ['activite_id' => $activite_id]);
+
+      } elseif ($step[0]->curent_scene == $scene_count) {
+        echo 'coucou';
+        die();
+
+        $session_id = $this->sessionModel->getLastSession($user_id, $activite_id);
+        $session = Session::find($session_id[0]->id);
+        $session->curent_scene = $next_scene;
+        // $session->finish = 1;
+        $session->save();
+
+        return redirect()->route('activite.showScene', ['activite_id' => $activite_id]);
+
+      } elseif ($step[0]->curent_scene > $scene_count) {
+        echo 'coucou';
+        die();
+
+        return redirect()->route('result.show', ['activite_id' => $activite_id]);
+
       }
-
-      $session_id = $this->sessionModel->getLastSession($user_id, $activite_id);
-      $session = Session::find($session_id[0]->id);
-      $session->curent_scene = $next_scene;
-      $session->save();
-
-      return redirect()->route('activite.showScene', ['activite_id' => $activite_id]);
     }
   }
 
