@@ -68,20 +68,4 @@ class Session extends Model
     return $step;
   }
 
-  public function getStatus($user_id, $activite_id)
-  {
-    $status = DB::table('sessions')
-    ->select('status')
-    ->where('activite_id', '=', $activite_id)
-    ->where('user_id', '=', $user_id)
-    ->orderBy('updated_at', 'DESC')
-    ->limit(1)
-    ->get();
-
-    if (!empty($status[0]->status)) {
-      return $status[0]->status;
-    } else {
-      return 0;
-    }
-  }
 }

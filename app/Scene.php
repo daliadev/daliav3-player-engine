@@ -75,8 +75,9 @@ class Scene extends Model
   {
     // Recuperer la position de la scene ayant cet ID au sein de l'activité ayant cet ID
     $position = DB::table('sequences_scenes')
-    ->select('sequences_scenes.position')
-    // ->join('sequences_scenes', 'sequences_scenes.id_scene', '=', 'scenes.id')
+    ->select('sequences_scenes.*')
+    ->join('activites_sequences', 'activites_sequences.id_sequence', '=', 'sequences_scenes.id_sequence')
+    ->where('activites_sequences.id_activite', '=', $activite_id)
     ->where('sequences_scenes.id_scene', '=', $curent_scene_id)
     ->orderBy('sequences_scenes.position', 'ASC')
     ->get();

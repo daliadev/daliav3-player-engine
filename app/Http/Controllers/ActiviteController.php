@@ -98,7 +98,6 @@ class ActiviteController extends Controller
             return view('newOrContinu', compact(
               'activite_id'
             ));
-            // return $this->showScene($activite_id);
           }
         }
       }
@@ -106,33 +105,29 @@ class ActiviteController extends Controller
 
     public function showScene($activite_id)
     {
-      $user_id = Auth::id();
-      // Recuperation des scenes composant l'activité n°$id :
-      $scenes_list = $this->sceneModel->getScenes($activite_id);
-      // Afficher la scene active
-      $active_scene = $this->sceneModel->getActiveScene($user_id, $activite_id);
+      if ($this->activiteModel->findOrFail($activite_id)) {
+        $user_id = Auth::id();
+        // Recuperation des scenes composant l'activité n°$id :
+        $scenes_list = $this->sceneModel->getScenes($activite_id);
+        // Afficher la scene active
+        $active_scene = $this->sceneModel->getActiveScene($user_id, $activite_id);
+        // Checker le "type" de sequence. Si "exercice" => charger le js
+        $scene_count = $this->sceneModel->sceneCount($user_id, $activite_id);
+        $step = $this->sessionModel->getStep($user_id, $activite_id);
+        $position = $this->sceneModel->getPosition($activite_id, $step[0]->curent_scene);
 
-      // Checker le "type" de sequence. Si "exercice" => charger le js
-      $scene_count = $this->sceneModel->sceneCount($user_id, $activite_id);
-      $step = $this->sessionModel->getStep($user_id, $activite_id);
-      $position = $this->sceneModel->getPosition($activite_id, 12);
+        $last_scene = ($position == $scene_count) ? 1 : 0;
+        $first_scene = ($position == 1) ? 1 : 0;
 
-      echo $position;
-      die();
-
-      // echo $position;
-
-      $last_scene = ($step[0]->curent_scene == $scene_count) ? 1 : 0;
-      $first_scene = ($step[0]->curent_scene == 1) ? 1 : 0;
-
-      return view('scene', compact(
-        'scenes_list',
-        'activite_id',
-        'active_scene',
-        'last_scene',
-        'first_scene',
-        'step'
-      ));
+        return view('scene', compact(
+          'scenes_list',
+          'activite_id',
+          'active_scene',
+          'last_scene',
+          'first_scene',
+          'position'
+        ));
+      }
     }
 
   public function create()
@@ -144,8 +139,11 @@ class ActiviteController extends Controller
 
   public function goNextScene($activite_id)
   {
+
     // On verifie que l'activité existe
     if ($this->activiteModel->findOrFail($activite_id)) {
+      echo 'coucou';
+      die();
       // A FAIRE : onverifie qu'il y a bien une session en cours pour cette
       // activité et ce use
       $user_id = Auth::id();

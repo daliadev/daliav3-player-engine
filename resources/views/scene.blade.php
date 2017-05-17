@@ -11,7 +11,7 @@
       </div>
 			<div class="panel-body">
 				<p><u>Scene en cours :</u> {!! $active_scene[0]->name !!}</p>
-        <p><u>Position de la scene :</u> {!! $step[0]->curent_scene !!}e</p>
+        <p><u>Position de la scene :</u> {!! $position !!}e</p>
         <p><u>Id de la scene :</u> {!! $active_scene[0]->id !!}</p>
       </div>
 		</div>
