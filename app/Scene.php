@@ -106,7 +106,29 @@ class Scene extends Model
     ->limit(1)
     ->get();
 
-    $count = json_decode($scene_count, true);
-    return $count[0]['scene_count'];
+    return $scene_count[0]->scene_count;
+  }
+
+  public function getNextSceneId($activite_id, $curent_scene_id)
+  {
+    // dans sequence_scene, select l'id_scene où position = position+1 ET
+    //
+    $position = DB::table('sequences_scenes')
+    ->select('sequences_scenes.*')
+    ->join('activites_sequences', 'activites_sequences.id_sequence', '=', 'sequences_scenes.id_sequence')
+    ->where('activites_sequences.id_activite', '=', $activite_id)
+    ->where('sequences_scenes.id_scene', '=', $curent_scene_id)
+    ->orderBy('sequences_scenes.position', 'ASC')
+    ->get();
+    $next_position = ($position[0]->position)+1;
+
+    $next_id = DB::table('sequences_scenes')
+    ->select('sequences_scenes.*')
+    ->join('activites_sequences', 'activites_sequences.id_sequence', '=', 'sequences_scenes.id_sequence')
+    ->where('activites_sequences.id_activite', '=', $activite_id)
+    ->where('sequences_scenes.position', '=', $next_position)
+    ->limit(1)
+    ->get();
+    return $next_id[0]->id_scene;
   }
 }

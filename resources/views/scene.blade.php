@@ -23,9 +23,6 @@
     @if($last_scene == 0)
       {!! link_to_route('activite.next', 'Suite', [$activite_id], ['class' => 'btn btn-info pull-right']) !!}
     @endif
-    @if($first_scene == 0)
-      {!! link_to_route('activite.previous', 'Retour', [$activite_id], ['class' => 'btn btn-info pull-left']) !!}
-    @endif
 
   </div>
 
