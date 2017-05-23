@@ -78,6 +78,8 @@ class ResultsController extends Controller
   */
   public function show($activite_id)
   {
+    echo 'resultats';
+    die();
       // A FAIRE : on ne peut acceder a result QUE si on a suivi l'activité jusqu'à la fin
     $user_id = Auth::id();
     $scene_count = $this->sceneModel->sceneCount($user_id, $activite_id);

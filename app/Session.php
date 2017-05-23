@@ -68,20 +68,15 @@ class Session extends Model
     return $step;
   }
 
-  public function nextSceneToThisSession($session_id, $next_scene_id)
+  public function nextSceneToThisSession($infos_session, $next_scene_id, $penultimate)
   {
-    $session = Session::find($session_id);
+    $session = Session::find($infos_session[0]->id);
     $session->curent_scene = $next_scene_id;
+    if ($penultimate) {
+      $session->finish = true;
+    }
     $session->save();
 
-    echo '<pre>';
-    var_dump($session->curent_scene);
-    echo '</pre>';
-    die();
-    if (1 == 0) {
-      $session->finish = true;
-      $session->save();
-    }
   }
 
 }
