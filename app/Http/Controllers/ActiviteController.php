@@ -32,9 +32,6 @@ class ActiviteController extends Controller
 
   private $request;
 
-
-  // A FAIRE : mettre dans le constructeur toute les variables utilisé partout
-  // (si possible)
   public function __construct(ActiviteRepository $activiteRepository)
   {
     // Modele(s)
@@ -73,11 +70,10 @@ class ActiviteController extends Controller
   * Affiche l'activité dont l'ID est passé en parametre
   * Ex d'url : api/activite/$id
   * @param  int  $id : Clé primaire dans la BDD de l'activité a afficher
-  * @return
+  * @return une vue
   */
   public function show($activite_id)
   {
-
     if ($this->activiteModel->findOrFail($activite_id)) {
 
         $user_id = Auth::id();
@@ -89,7 +85,7 @@ class ActiviteController extends Controller
           // Puis rediriger vers la vue
           return redirect()->route('activite.showScene', ['activite_id' => $activite_id]);
         } else {
-          if ($last_session[0]->finish == true) {
+          if ($last_session[0]->SESSION_FINISHED == true) {
             // echo 'voir results avec bouton recommencer cette activité (= startNewSession())';
             // die();
             return redirect()->route('result.show', ['activite_id' => $activite_id]);
@@ -106,6 +102,7 @@ class ActiviteController extends Controller
 
     public function showScene($activite_id)
     {
+
       if ($this->activiteModel->findOrFail($activite_id)) {
         $user_id = Auth::id();
         $last_session = $this->sessionModel->getLastSession($user_id, $activite_id);
@@ -120,9 +117,9 @@ class ActiviteController extends Controller
         // Afficher la scene active
         $active_scene = $this->sceneModel->getActiveScene($user_id, $activite_id);
         // Checker le "type" de sequence. Si "exercice" => charger le js
-        $scene_count = $this->sceneModel->sceneCount($user_id, $activite_id);
+        $scene_count = $this->sceneModel->sceneCount($activite_id);
         $step = $this->sessionModel->getStep($user_id, $activite_id);
-        $position = $this->sceneModel->getPosition($activite_id, $step[0]->curent_scene);
+        $position = $this->sceneModel->getPosition($activite_id, $step[0]->CURRENT_SCENE);
 
         $last_scene = ($position == $scene_count) ? 1 : 0;
 
@@ -150,9 +147,10 @@ class ActiviteController extends Controller
     if ($this->activiteModel->findOrFail($activite_id)) {
       $user_id = Auth::id();
       $last_session = $this->sessionModel->getLastSession($user_id, $activite_id);
+
       if (!empty($last_session[0])) {
         $step = $this->sessionModel->getStep($user_id, $activite_id);
-        $position = $this->sceneModel->getPosition($activite_id, $step[0]->curent_scene);
+        $position = $this->sceneModel->getPosition($activite_id, $step[0]->CURRENT_SCENE);
         $scene_count = $this->sceneModel->sceneCount($user_id, $activite_id);
 
         $last_scene = ($position == $scene_count) ? 1 : 0;
@@ -163,9 +161,9 @@ class ActiviteController extends Controller
           return redirect()->route('activite.showScene', ['activite_id' => $activite_id]);
         } else {
 
-          $next_scene_id = $this->sceneModel->getNextSceneId($activite_id, $step[0]->curent_scene);
+          $next_scene_id = $this->sceneModel->getNextSceneId($activite_id, $step[0]->CURRENT_SCENE);
           $update_session = $this->sessionModel->nextSceneToThisSession($last_session, $next_scene_id, $penultimate);
-
+      
           return redirect()->route('activite.showScene', ['activite_id' => $activite_id]);
         }
       } else {

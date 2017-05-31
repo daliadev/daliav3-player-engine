@@ -10,9 +10,9 @@
         <u>Scene :</u> {!! $scenes_list !!}<br>
       </div>
 			<div class="panel-body">
-				<p><u>Scene en cours :</u> {!! $active_scene[0]->name !!}</p>
+				<p><u>Scene en cours :</u> {!! $active_scene[0]->NOM_SCENE_NAME !!}</p>
         <p><u>Position de la scene :</u> {!! $position !!}e</p>
-        <p><u>Id de la scene :</u> {!! $active_scene[0]->id !!}</p>
+        <p><u>Id de la scene :</u> {!! $active_scene[0]->ID_SCENE !!}</p>
       </div>
 		</div>
     <!-- Si isFinished => bouton checkResult -->

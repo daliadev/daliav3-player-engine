@@ -16,11 +16,10 @@ class Scene extends Model
   public function getScenes($id)
   {
     $scenes = DB::table('scenes')
-    ->select('scenes.id')
-    ->join('sequences_scenes', 'sequences_scenes.id_scene', '=', 'scenes.id')
-    ->join('activites_sequences', 'activites_sequences.id_sequence', '=', 'sequences_scenes.id_sequence')
-    ->where('activites_sequences.id_activite', '=', $id)
-    ->orderBy('sequences_scenes.position', 'ASC')
+    ->select('scenes.ID_SCENE')
+    ->join('cut', 'cut.ID_SCENE', '=', 'scenes.ID_SCENE')
+    ->where('cut.ID_ACTIVITE', '=', $id)
+    ->orderBy('cut.POSITION_INDEX', 'ASC')
     ->get();
 
     return $scenes;
@@ -32,15 +31,15 @@ class Scene extends Model
     ->select('*')
     ->where('user_id', '=', $user_id)
     ->where('activite_id', '=', $activite_id)
-    ->orderBy('updated_at', 'DESC')
+    ->orderBy('SESSION_DATE', 'DESC')
     ->limit(1)
     ->get();
 
-    $id_scene = $active_scene[0]->curent_scene;
+    $id_scene = $active_scene[0]->CURRENT_SCENE;
 
     $scene = DB::table('scenes')
     ->select('*')
-    ->where('id', '=', $id_scene)
+    ->where('ID_SCENE', '=', $id_scene)
     ->get();
 
     return $scene;
@@ -74,15 +73,14 @@ class Scene extends Model
   public function getPosition($activite_id, $curent_scene_id)
   {
     // Recuperer la position de la scene ayant cet ID au sein de l'activité ayant cet ID
-    $position = DB::table('sequences_scenes')
-    ->select('sequences_scenes.*')
-    ->join('activites_sequences', 'activites_sequences.id_sequence', '=', 'sequences_scenes.id_sequence')
-    ->where('activites_sequences.id_activite', '=', $activite_id)
-    ->where('sequences_scenes.id_scene', '=', $curent_scene_id)
-    ->orderBy('sequences_scenes.position', 'ASC')
+    $position = DB::table('cut')
+    ->select('POSITION_INDEX')
+    ->where('ID_ACTIVITE', '=', $activite_id)
+    ->where('ID_SCENE', '=', $curent_scene_id)
+    ->limit(1)
     ->get();
 
-    return $position[0]->position;
+    return $position[0]->POSITION_INDEX;
   }
 
   public function activiteIsStarted($user_id, $activite_id)
@@ -97,38 +95,32 @@ class Scene extends Model
     return $exist;
   }
 
-  public function sceneCount($user_id, $activite_id)
+  public function sceneCount($activite_id)
   {
-    $scene_count = DB::table('sessions')
-    ->select('scene_count')
-    ->where('user_id', '=', $user_id)
-    ->where('activite_id', '=', $activite_id)
-    ->limit(1)
-    ->get();
+    $scene_count = $this->getScenes($activite_id);
+    $scene_count = count($scene_count);
 
-    return $scene_count[0]->scene_count;
+    return $scene_count;
   }
 
   public function getNextSceneId($activite_id, $curent_scene_id)
   {
     // dans sequence_scene, select l'id_scene où position = position+1 ET
-    //
-    $position = DB::table('sequences_scenes')
-    ->select('sequences_scenes.*')
-    ->join('activites_sequences', 'activites_sequences.id_sequence', '=', 'sequences_scenes.id_sequence')
-    ->where('activites_sequences.id_activite', '=', $activite_id)
-    ->where('sequences_scenes.id_scene', '=', $curent_scene_id)
-    ->orderBy('sequences_scenes.position', 'ASC')
-    ->get();
-    $next_position = ($position[0]->position)+1;
-
-    $next_id = DB::table('sequences_scenes')
-    ->select('sequences_scenes.*')
-    ->join('activites_sequences', 'activites_sequences.id_sequence', '=', 'sequences_scenes.id_sequence')
-    ->where('activites_sequences.id_activite', '=', $activite_id)
-    ->where('sequences_scenes.position', '=', $next_position)
+    $position = DB::table('cut')
+    ->select('POSITION_INDEX')
+    ->where('ID_ACTIVITE', '=', $activite_id)
+    ->where('ID_SCENE', '=', $curent_scene_id)
     ->limit(1)
     ->get();
-    return $next_id[0]->id_scene;
+
+    $next_position = ($position[0]->POSITION_INDEX)+1;
+
+    $next_id = DB::table('cut')
+    ->select('ID_SCENE')
+    ->where('ID_ACTIVITE', '=', $activite_id)
+    ->where('POSITION_INDEX', '=', $next_position)
+    ->limit(1)
+    ->get();
+    return $next_id[0]->ID_SCENE;
   }
 }

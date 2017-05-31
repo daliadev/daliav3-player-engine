@@ -18,6 +18,8 @@ class ActiviteRepository
 
 	private function save(Activite $activite, Array $inputs)
 	{
+    // Ci dessous : exemple d'un ancien projet gardé juste pour avoir un exemple de la syntaxe.
+    // A FAIRE : a effacer/supprimer
 		// $game->name = $inputs['name'];
 		// $game->console = $inputs['console'];
 		// $game->boite = isset($inputs['boite']);

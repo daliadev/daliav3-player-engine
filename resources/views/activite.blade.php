@@ -18,7 +18,7 @@
         		<tr>
         			<th>Id_activite</th>
               <th>Nom_activite</th>
-        			<th></th>
+        			<th>Description</th>
         			<th></th>
         			<th></th>
         		</tr>
@@ -27,8 +27,8 @@
         		@foreach ($activites as $activite)
         			<tr>
         				<td><strong>{!! link_to_route('activite.show', $activite->id, [$activite->id]) !!}</strong></td>
-                <td>{!! $activite->name !!}</td>
-        				<td></td>
+                <td>{!! $activite->ACTIVITE_TITLE !!}</td>
+        				<td>{!! $activite->ACTIVITE_DESC !!}</td>
         				<td></td>
         				<td></td>
         			</tr>
