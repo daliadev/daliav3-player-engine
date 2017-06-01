@@ -8,6 +8,8 @@ use DB;
 
 class Activite extends Model
 {
+  protected $primaryKey = 'id';
+
   public function sequences()
     {
         return $this->hasMany(\App\Sequence::class);

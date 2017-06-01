@@ -10,7 +10,11 @@ use App\Scene;
 
 class Session extends Model
 {
+  protected $primaryKey = 'SESSION_ID';
+
   private $sceneModel;
+
+  public $timestamps = false;
 
   public function __construct()
   {
@@ -72,7 +76,7 @@ class Session extends Model
 
   public function nextSceneToThisSession($infos_session, $next_scene_id, $penultimate)
   {
-    $session = Session::find($infos_session[0]->id);
+    $session = Session::find($infos_session[0]->SESSION_ID);
     $session->CURRENT_SCENE = $next_scene_id;
     if ($penultimate) {
       $session->SESSION_FINISHED = true;

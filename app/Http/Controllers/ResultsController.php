@@ -78,29 +78,18 @@ class ResultsController extends Controller
   */
   public function show($activite_id)
   {
-    echo 'resultats';
-    die();
-      // A FAIRE : on ne peut acceder a result QUE si on a suivi l'activité jusqu'à la fin
-    $user_id = Auth::id();
-    $scene_count = $this->sceneModel->sceneCount($user_id, $activite_id);
-    $step = $this->sessionModel->getStep($user_id, $activite_id);
+    // A FAIRE : on ne peut acceder a result QUE si on a suivi l'activité jusqu'à la fin
+    if ($this->activiteModel->findOrFail($activite_id)) {
+      $user_id = Auth::id();
+      $last_session = $this->sessionModel->getLastSession($user_id, $activite_id);
 
-    if ($step[0]->curent_scene == $scene_count || $step[0]->curent_scene == $scene_count+1) {
-
-      // A FAIRE : mettre a jour le status de cette session à "2"
-      $session_id = ($this->sessionModel->getLastSession($user_id, $activite_id))[0]->id;
-
-      $session = Session::find($session_id);
-      $session->curent_scene = $session->scene_count+1;
-      $session->finish = 1;
-      $session->save();
+      if (empty($last_session[0]) || $last_session[0]->SESSION_FINISHED == 0 ) {
+        return 'Vous n\'avez pas accès aux resultats pour cette activité';
+      }
 
       return view('results', compact(
         'activite_id'
-        )) ;
-    } else {
-
-      return redirect()->route('activite.show', ['activite_id' => $activite_id]);
+        ));
     }
   }
 

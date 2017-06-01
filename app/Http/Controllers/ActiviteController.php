@@ -163,7 +163,7 @@ class ActiviteController extends Controller
 
           $next_scene_id = $this->sceneModel->getNextSceneId($activite_id, $step[0]->CURRENT_SCENE);
           $update_session = $this->sessionModel->nextSceneToThisSession($last_session, $next_scene_id, $penultimate);
-      
+
           return redirect()->route('activite.showScene', ['activite_id' => $activite_id]);
         }
       } else {
@@ -174,30 +174,5 @@ class ActiviteController extends Controller
       }
     }
   }
-
-  public function viewResults($activite_id){
-      // A FAIRE : on ne peut acceder a result QUE si on a suivi l'activité jusqu'à la fin
-    echo 'resultats';
-    die();
-    $user_id = Auth::id();
-    $scene_count = $this->sceneModel->sceneCount($user_id, $activite_id);
-    $step = $this->sessionModel->getStep($user_id, $activite_id);
-
-    if ($step[0]->curent_scene == $scene_count) {
-
-      // A FAIRE : mettre a jour le status de cette session à "2"
-      $session_id = $this->sceneModel->activiteIsStarted($user_id, $activite_id);
-      $session = Session::find($session_id[0]['id']);
-      $session->status = 2;
-      $session->save();
-
-      return view('results', compact(
-        'activite_id'
-        )) ;
-    } else {
-      return redirect()->route('activite.show', ['activite_id' => $activite_id]);
-    }
-  }
-
 
 }

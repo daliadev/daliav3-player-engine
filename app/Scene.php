@@ -7,6 +7,7 @@ use DB;
 
 class Scene extends Model
 {
+  protected $primaryKey = 'ID_SCENE';
 
   public function sequence()
   {

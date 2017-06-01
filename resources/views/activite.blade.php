@@ -7,7 +7,6 @@
 			   <div class="alert alert-success alert-dismissible">{!! session('ok') !!}</div>
 		  @endif
 
-    <!-- Table liste des jeux : consultation et ajout-->
 		<div id="view-box" class="panel panel-primary">
 			<div class="panel-heading">
 				<h3 class="panel-title">Liste des activités</h3>
