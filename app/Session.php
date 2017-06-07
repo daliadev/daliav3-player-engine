@@ -90,15 +90,18 @@ class Session extends Model
   * @param bool $penultimate : 1 si CURRENT_SCENE = avant derniere ; 0 si non
   * @return
   */
-  public function nextSceneToThisSession($infos_session, $next_scene_id, $penultimate)
+  public function nextSceneToThisSession($infos_session, $next_scene_id)
   {
     $session = Session::find($infos_session[0]->SESSION_ID);
     $session->CURRENT_SCENE = $next_scene_id;
-    if ($penultimate) {
-      $session->SESSION_FINISHED = true;
-    }
     $session->save();
+  }
 
+  public function sessionIsFinished($infos_session)
+  {
+    $session = Session::find($infos_session[0]->SESSION_ID);
+    $session->SESSION_FINISHED = true;
+    $session->save();
   }
 
 }

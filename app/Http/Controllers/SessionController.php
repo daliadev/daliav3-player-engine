@@ -3,7 +3,6 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-
 use Illuminate\Support\Facades\Auth;
 
 use App\Repositories\ActiviteRepository;
@@ -29,6 +28,12 @@ class SessionController extends Controller
     $this->sessionModel = new Session;
   }
 
+  /**
+  * Route de type /api/activite/$id/new qui fait appel au Model qui fait l'Insert
+  * en BDD de la nouvelle session puis redirige vers showScene
+  * @param  int  $activite_id : ID dans la BDD de l'activité a afficher
+  * @return une redirection.
+  */
   public function newSession($activite_id)
   {
     $user_id = Auth::id();

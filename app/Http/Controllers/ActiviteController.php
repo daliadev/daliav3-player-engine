@@ -46,7 +46,7 @@ class ActiviteController extends Controller
 
   /**
    * Affiche la liste de TOUTES les activite
-   * Ex d'url : api/activite
+   * Ex d'url : / ou api/activite
    * @return View
    */
   public function index()
@@ -63,7 +63,7 @@ class ActiviteController extends Controller
   * Affiche l'activité dont l'ID est passé en parametre
   * Ex d'url : api/activite/$id
   * @param  int  $id : ID dans la BDD de l'activité a afficher
-  * @return une view
+  * @return une view ou une redirection vers ActiviteController@showscene ou  ResultController@show.
   */
   public function show($activite_id)
   {
@@ -92,6 +92,12 @@ class ActiviteController extends Controller
       }
     }
 
+    /**
+    * Affiche la vue d'une scene
+    * Ex d'url : api/activite/$id/show
+    * @param  int  $activite_id : Id de l'activité
+    * @return une view ou une redirection vers ActiviteController@showscene ou  ResultController@show.
+    */
     public function showScene($activite_id)
     {
 
@@ -114,6 +120,10 @@ class ActiviteController extends Controller
 
         $last_scene = ($position == $scene_count) ? 1 : 0;
 
+        if ($last_session[0]->SESSION_FINISHED != 1 && $last_scene == 1) {
+          $finished = $this->sessionModel->sessionIsFinished($last_session);
+        }
+
         return view('scene', compact(
           'scenes_list',
           'activite_id',
@@ -134,6 +144,13 @@ class ActiviteController extends Controller
     ));
   }
 
+  /**
+  * Permet de mettre a jour le current_scene dans la session puis redirige vers
+  * showScene (qui renverra la vue correspondante.)
+  * Ex d'url : api/activite/$id/next
+  * @param  int  $id : ID dans la BDD de l'activité a afficher
+  * @return une redirection.
+  */
   public function goNextScene($activite_id)
   {
     // On verifie que l'activité existe
@@ -147,7 +164,6 @@ class ActiviteController extends Controller
         $scene_count = $this->sceneModel->sceneCount($user_id, $activite_id);
 
         $last_scene = ($position == $scene_count) ? 1 : 0;
-        $penultimate = ($position == $scene_count-1) ? 1 : 0;
 
         if ($last_scene) {
           // Si on est deja a la derniere scene, on redirige sur elle meme.
@@ -155,7 +171,7 @@ class ActiviteController extends Controller
         } else {
 
           $next_scene_id = $this->sceneModel->getNextSceneId($activite_id, $step[0]->CURRENT_SCENE);
-          $update_session = $this->sessionModel->nextSceneToThisSession($last_session, $next_scene_id, $penultimate);
+          $update_session = $this->sessionModel->nextSceneToThisSession($last_session, $next_scene_id);
 
           return redirect()->route('activite.showScene', ['activite_id' => $activite_id]);
         }
