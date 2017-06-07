@@ -2,8 +2,6 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
-
 use Illuminate\Support\Facades\Auth;
 
 use App\Repositories\ActiviteRepository;
@@ -16,28 +14,23 @@ use App\Session;
 
 use Response;
 
-//JSON Web Token
 use JWTAuth;
 use Tymon\JWTAuth\Exceptions\JWTException;
 
 class ActiviteController extends Controller
 {
-  protected $gameRepository;
-  protected $nbrPerPage = 10;
+  protected $nbrPerPage = 2;
 
   private $sceneModel;
   private $sequenceModel;
   private $activiteModel;
   private $sessionModel;
 
-  private $request;
 
   public function __construct(ActiviteRepository $activiteRepository)
   {
     // Modele(s)
-    $this->request = new Request;
     $this->sceneModel = new Scene;
-    $this->sequenceModel = new Sequence;
     $this->activiteModel = new Activite;
     $this->sessionModel = new Session;
 
@@ -46,7 +39,7 @@ class ActiviteController extends Controller
 
     // Middleware(s)
     $this->middleware('auth')->only(['store', 'create', 'show', 'update', 'destroy',
-    'edit', 'goNextScene', 'goPreviousScene']);
+    'edit', 'goNextScene']);
 
     $this->user_id = Auth::id();
   }
