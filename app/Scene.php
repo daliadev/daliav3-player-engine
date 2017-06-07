@@ -14,6 +14,11 @@ class Scene extends Model
       return $this->belongsTo(\App\Sequence::class);
   }
 
+  /**
+  * Retourne les infos relatives aux scenes de cette Activite
+  * @param  int  $id : ID de l'activité
+  * @return
+  */
   public function getScenes($id)
   {
     $scenes = DB::table('scenes')
@@ -26,6 +31,12 @@ class Scene extends Model
     return $scenes;
   }
 
+  /**
+  * Retourne la derniere session de ce User dans cette Activité
+  * @param int $user_id : Id du User
+  * @param int $activite_id : Id de l'activité
+  * @return
+  */
   public function getActiveScene($user_id, $activite_id)
   {
     $active_scene = DB::table('sessions')
@@ -46,31 +57,13 @@ class Scene extends Model
     return $scene;
   }
 
-  public function activeScene($user_id, $activite_id)
-  {
-    // A FAIRE : A REVOIR
-    $active_scene = DB::table('sessions')
-    ->select('curent_scene')
-    ->where('user_id', '=', $user_id)
-    ->where('activite_id', '=', $activite_id)
-    ->orderBy('updated_at', 'DESC')
-    ->limit(1)
-    ->get();
-
-    $scenes_list = json_decode($active_scene, true);
-
-    $scene = DB::table('scenes')
-    ->select('scenes.*')
-    ->join('sequences_scenes', 'sequences_scenes.id_scene', '=', 'scenes.id')
-    ->join('activites_sequences', 'activites_sequences.id_sequence', '=', 'sequences_scenes.id_sequence')
-    ->where('activites_sequences.id_activite', '=', $activite_id)
-    ->where('sequences_scenes.position', '=', $scenes_list)
-    ->orderBy('sequences_scenes.position', 'ASC')
-    ->get();
-
-    return $scene;
-  }
-
+  /**
+  * Retourne la position de la scene ayant cet ID au sein de l'activité ayant
+  * cet ID
+  * @param int $activite_id : Id de l'activité
+  * @param int $curent_scene_id : Id de la scene qu'on souhaite "localiser"
+  * @return int : Position de la scene dans l'activite
+  */
   public function getPosition($activite_id, $curent_scene_id)
   {
     // Recuperer la position de la scene ayant cet ID au sein de l'activité ayant cet ID
@@ -84,18 +77,11 @@ class Scene extends Model
     return $position[0]->POSITION_INDEX;
   }
 
-  public function activiteIsStarted($user_id, $activite_id)
-  {
-    $activite_user = DB::table('sessions')
-    ->select('id')
-    ->where('user_id', '=', $user_id)
-    ->where('activite_id', '=', $activite_id)
-    ->get();
-
-    $exist = json_decode($activite_user, true);
-    return $exist;
-  }
-
+  /**
+  * Retourne le compte du nombre de scenes composant cette activité.
+  * @param int $activite_id : Id de l'activité
+  * @return int : Count
+  */
   public function sceneCount($activite_id)
   {
     $scene_count = $this->getScenes($activite_id);
@@ -104,9 +90,15 @@ class Scene extends Model
     return $scene_count;
   }
 
+  /**
+  * Recupere et retourne l'Id la scene qui suivra immediatement la Current_Scene.
+  * @param int $activite_id : Id de l'activité
+  * @param int $curent_scene_id : Id la scene courante
+  * @return int : Id de la scene suivante
+  */
+
   public function getNextSceneId($activite_id, $curent_scene_id)
   {
-    // dans sequence_scene, select l'id_scene où position = position+1 ET
     $position = DB::table('cut')
     ->select('POSITION_INDEX')
     ->where('ID_ACTIVITE', '=', $activite_id)

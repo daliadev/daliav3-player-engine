@@ -1,4 +1,5 @@
 <?php
+// Controller natif de Laravel
 
 namespace App\Http\Controllers;
 

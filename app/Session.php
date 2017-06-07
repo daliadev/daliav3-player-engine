@@ -21,6 +21,11 @@ class Session extends Model
     $this->sceneModel = new Scene;
   }
 
+  /**
+  * Insert un nouvelle session pour ce User pour cette Activite
+  * @param  int  $user_id : ID du User
+  * @param  int  $activite_id : ID de l'activité
+  */
   public function startNewSession($user_id, $activite_id)
   {
     $scene_count = count($this->sceneModel->getScenes($activite_id));
@@ -37,17 +42,13 @@ class Session extends Model
      ]);
   }
 
-  public function getSessions($user_id, $activite_id)
-  {
-    $sessions = DB::table('sessions')
-    ->select('*')
-    ->where('activite_id', '=', $activite_id)
-    ->where('user_id', '=', $user_id)
-    ->get();
-
-    return $sessions;
-  }
-
+  /**
+  * Retourne les infos relatives à la derniere session de ce User pour
+  * cette Activite
+  * @param  int  $user_id : ID du User
+  * @param  int  $activite_id : ID de l'activité
+  * @return
+  */
   public function getLastSession($user_id, $activite_id)
   {
     $session = DB::table('sessions')
@@ -61,6 +62,13 @@ class Session extends Model
     return $session;
   }
 
+  /**
+  * Retourne l'ID de la scene active pour la derniere session de cette Activite
+  * pour ce User
+  * @param  int  $user_id : ID du User
+  * @param  int  $activite_id : ID de l'activité
+  * @return
+  */
   public function getStep($user_id, $activite_id)
   {
     $step = DB::table('sessions')
@@ -74,6 +82,14 @@ class Session extends Model
     return $step;
   }
 
+  /**
+  * Update la CURRENT_SCENE (et le SESSION_FINISHED si besoin) vers la prochaine
+  * scene de cette activité
+  * @param       $infos_session : session actuelle
+  * @param  int  $next_scene_id : ID de la prochaine scene de cette activité
+  * @param bool $penultimate : 1 si CURRENT_SCENE = avant derniere ; 0 si non
+  * @return
+  */
   public function nextSceneToThisSession($infos_session, $next_scene_id, $penultimate)
   {
     $session = Session::find($infos_session[0]->SESSION_ID);

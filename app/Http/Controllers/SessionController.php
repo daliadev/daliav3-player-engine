@@ -16,7 +16,6 @@ use App\Session;
 
 use Response;
 
-//JSON Web Token
 use JWTAuth;
 use Tymon\JWTAuth\Exceptions\JWTException;
 

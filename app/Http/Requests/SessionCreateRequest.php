@@ -14,12 +14,7 @@ class SessionCreateRequest extends FormRequest
 
 	public function rules()
 	{
-		return [
-			'user_id' => 'required',
-      'activite_id' => 'required',
-      'scene_count' => 'required',
-      'curent_scene' => 'required'
-		];
+		
 	}
 
 }

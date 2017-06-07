@@ -19,6 +19,8 @@ use Tymon\JWTAuth\Exceptions\JWTException;
 
 class ActiviteController extends Controller
 {
+  // Permet de modifier le nombre d'activités affichées par page sur l'index
+  // (et d'adapter la pagination)
   protected $nbrPerPage = 2;
 
   private $sceneModel;
@@ -40,14 +42,12 @@ class ActiviteController extends Controller
     // Middleware(s)
     $this->middleware('auth')->only(['store', 'create', 'show', 'update', 'destroy',
     'edit', 'goNextScene']);
-
-    $this->user_id = Auth::id();
   }
 
   /**
    * Affiche la liste de TOUTES les activite
    * Ex d'url : api/activite
-   * @return Response format JSON
+   * @return View
    */
   public function index()
   {
@@ -62,8 +62,8 @@ class ActiviteController extends Controller
   /**
   * Affiche l'activité dont l'ID est passé en parametre
   * Ex d'url : api/activite/$id
-  * @param  int  $id : Clé primaire dans la BDD de l'activité a afficher
-  * @return une vue
+  * @param  int  $id : ID dans la BDD de l'activité a afficher
+  * @return une view
   */
   public function show($activite_id)
   {
@@ -79,12 +79,11 @@ class ActiviteController extends Controller
           return redirect()->route('activite.showScene', ['activite_id' => $activite_id]);
         } else {
           if ($last_session[0]->SESSION_FINISHED == true) {
-            // echo 'voir results avec bouton recommencer cette activité (= startNewSession())';
-            // die();
+            // Si, dans la derniere session, l'activité était terminée : redirection
+            // vers la view de Resultats
             return redirect()->route('result.show', ['activite_id' => $activite_id]);
           } else {
-            // choix : recommencer (startnew puis methode qui show) ou continuer
-            // (methode qui show)
+            // Sinon, redirection vers la vue de choix "continuer ou recommencer"
             return view('newOrContinu', compact(
               'activite_id'
             ));
@@ -107,9 +106,8 @@ class ActiviteController extends Controller
         }
         // Recuperation des scenes composant l'activité n°$id :
         $scenes_list = $this->sceneModel->getScenes($activite_id);
-        // Afficher la scene active
+        // Recuperation de la scene active et de diverses infos la concernant.
         $active_scene = $this->sceneModel->getActiveScene($user_id, $activite_id);
-        // Checker le "type" de sequence. Si "exercice" => charger le js
         $scene_count = $this->sceneModel->sceneCount($activite_id);
         $step = $this->sessionModel->getStep($user_id, $activite_id);
         $position = $this->sceneModel->getPosition($activite_id, $step[0]->CURRENT_SCENE);
@@ -129,6 +127,8 @@ class ActiviteController extends Controller
 
   public function create()
   {
+    // Function à utiliser pour l'Insert de nouvelles activités en BDD (outil de
+    // scenarisation ?)
     return view('createActivite', compact(
       ''
     ));

@@ -17,12 +17,17 @@ use App\Result;
 
 use Response;
 
-//JSON Web Token
 use JWTAuth;
 use Tymon\JWTAuth\Exceptions\JWTException;
 
 class ResultController extends Controller
 {
+  // ---------------------------------------------------------------------------
+  // -------------------ATTENTION TRAVAIL EN COURS NON TERMINé------------------
+  // ---------------------------------------------------------------------------
+
+  // Permet de modifier le nombre de resultats affichés par page
+  // (et d'adapter la pagination)
   protected $nbrPerPage = 10;
 
   private $resultModel;
